@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  reader
+  author
+}
+
+enum PostStatus {
+  draft
+  published
+  archived
+}
+
+enum VoteTargetType {
+  post
+  comment
+}
+
+enum SubscriptionStatus {
+  pending
+  active
+  unsubscribed
+}
+
+enum ContributionStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum AccountStatus {
+  verified
+  unverified
+  banned
+}
+
+enum TokenType {
+  access
+  refresh
+  reset_password
+  email_verification
+}
+
+model Token {
+  id String @id @default(uuid()) @db.Uuid
+  user_id String @db.Uuid 
+  token_type TokenType 
+  token_string String @unique @db.VarChar(255)
+  expires_at DateTime @db.Timestamp(6)
+  issued_at DateTime @default(now()) @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+
+model User {
+  id                 String   @id @default(uuid()) @db.Uuid
+  email              String   @unique @db.VarChar(255)
+  password_hash      String   @db.VarChar(255)
+  account_status     AccountStatus @default(unverified)
+  name               String?  @db.VarChar(100)
+  role               UserRole @default(reader)
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+  updated_at         DateTime @updatedAt @db.Timestamp(6)
+
+  // --- Relations ---
+  posts         Post[]
+  series        Series[]
+  comments      Comment[]
+  votes         Vote[]
+  collections   Collection[]
+  subscriptions Subscription[]
+  contributions Contribution[]
+}
+
+model Post {
+  id               String     @id @default(uuid()) @db.Uuid
+  author_id        String     @db.Uuid
+  title            String     @db.VarChar(255)
+  slug             String     @unique @db.VarChar(255)
+  content_markdown String     @db.Text
+  content_html     String     @db.Text
+  status           PostStatus @default(draft)
+  toc_json         Json?      @db.JsonB
+  search_vector    Unsupported("tsvector")? // For native tsvector type
+  created_at       DateTime   @default(now()) @db.Timestamp(6)
+  updated_at       DateTime   @updatedAt @db.Timestamp(6)
+
+  // --- Relations ---
+  author           User       @relation(fields: [author_id], references: [id])
+  post_tags        PostTag[]
+  series_posts     SeriesPost[]
+  comments         Comment[]
+  collection_posts CollectionPost[]
+  contributions    Contribution[]
+
+  // --- Indexes ---
+  @@index([author_id]) // Corresponds to idx_posts_author_id
+  @@index([search_vector], type: Gin) // Corresponds to idx_posts_search_vector
+}
+
+model Tag {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique @db.VarChar(50)
+  slug  String @unique @db.VarChar(50)
+
+  // --- Relations ---
+  post_tags PostTag[]
+}
+
+model PostTag {
+  post_id String @db.Uuid
+  tag_id  String @db.Uuid
+
+  // --- Relations ---
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  // --- Primary Key & Indexes ---
+  @@id([post_id, tag_id])
+  @@index([post_id]) // Corresponds to idx_post_tags_post_id
+  @@index([tag_id]) // Corresponds to idx_post_tags_tag_id
+}
+
+model Series {
+  id          String   @id @default(uuid()) @db.Uuid
+  author_id   String   @db.Uuid
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  description String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+
+  // --- Relations ---
+  author       User         @relation(fields: [author_id], references: [id])
+  series_posts SeriesPost[]
+}
+
+model SeriesPost {
+  series_id  String  @db.Uuid
+  post_id    String  @db.Uuid
+  sort_order Int     @default(0)
+
+  // --- Relations ---
+  series Series @relation(fields: [series_id], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  // --- Primary Key ---
+  @@id([series_id, post_id])
+}
+
+model Comment {
+  id         String   @id @default(uuid()) @db.Uuid
+  post_id    String   @db.Uuid
+  author_id  String   @db.Uuid
+  parent_id  String?  @db.Uuid
+  content    String   @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+
+  // --- Relations ---
+  post   Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author User     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  parent Comment? @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  // --- Indexes ---
+  @@index([post_id]) // Corresponds to idx_comments_post_id
+  @@index([parent_id]) // Corresponds to idx_comments_parent_id
+}
+
+model Vote {
+  user_id     String         @db.Uuid
+  target_id   String         @db.Uuid // Polymorphic ID (Post or Comment)
+  target_type VoteTargetType
+  value       Int            @db.SmallInt // NOTE: Prisma schema can't enforce CHECK (value IN (1, -1)). This must be handled by your application logic.
+
+  // --- Relations ---
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // --- Primary Key & Indexes ---
+  @@id([user_id, target_id, target_type])
+  @@index([target_id, target_type]) // Corresponds to idx_votes_target
+}
+
+model Collection {
+  id        String   @id @default(uuid()) @db.Uuid
+  user_id   String   @db.Uuid
+  name      String   @db.VarChar(100)
+  is_public Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  // --- Relations ---
+  user             User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  collection_posts CollectionPost[]
+}
+
+model CollectionPost {
+  collection_id String   @db.Uuid
+  post_id       String   @db.Uuid
+  added_at      DateTime @default(now()) @db.Timestamp(6)
+
+  // --- Relations ---
+  collection Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  post       Post       @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  // --- Primary Key ---
+  @@id([collection_id, post_id])
+}
+
+model Subscription {
+  id         String             @id @default(uuid()) @db.Uuid
+  email      String             @unique @db.VarChar(255)
+  user_id    String?            @db.Uuid
+  status     SubscriptionStatus @default(pending)
+  created_at DateTime           @default(now()) @db.Timestamp(6)
+
+  // --- Relations ---
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull) // SetNull on delete as user_id is nullable
+}
+
+model Contribution {
+  id                 String             @id @default(uuid()) @db.Uuid
+  post_id            String             @db.Uuid
+  contributor_id     String             @db.Uuid
+  content_suggestion String             @db.Text
+  status             ContributionStatus @default(pending)
+  created_at         DateTime           @default(now()) @db.Timestamp(6)
+
+  // --- Relations ---
+  post        Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  contributor User @relation(fields: [contributor_id], references: [id], onDelete: Cascade)
+
+  // --- Indexes ---
+  @@index([post_id]) // Corresponds to idx_contributions_post_id
+}
+
