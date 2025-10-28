@@ -1,4 +1,4 @@
-import { SignOptions, sign, verify } from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { injectable } from 'tsyringe'
 import { env } from '~/config/env.js'
 
@@ -12,7 +12,7 @@ export class JwtUtils {
    * Có thể override secret và expiresIn khi cần.
    */
   public sign(payload: object, options?: { secret?: string; expiresIn?: SignOptions['expiresIn'] }): string {
-    return sign(payload, options?.secret ?? this.defaultSecret, {
+    return jwt.sign(payload, options?.secret ?? this.defaultSecret, {
       expiresIn: options?.expiresIn ?? this.defaultExpiresIn
     })
   }
@@ -24,7 +24,7 @@ export class JwtUtils {
    */
   public verify<T = any>(token: string, secret?: string): T | null {
     try {
-      return verify(token, secret ?? this.defaultSecret) as T
+      return jwt.verify(token, secret ?? this.defaultSecret) as T
     } catch {
       return null
     }

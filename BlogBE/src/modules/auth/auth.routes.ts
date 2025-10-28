@@ -1,9 +1,8 @@
 import { Router } from 'express'
 import { injectable, inject } from 'tsyringe'
 import { AuthController } from './auth.controller.js'
-import { validate } from '~/shared/middleware/validate.middleware.js'
-import { registerSchema, loginSchema } from './auth.schema.js'
 import { wrapRequestHandler } from '~/shared/utils/handler.js'
+import { loginValidation, registerValidation } from './auth.middleware.js'
 
 @injectable()
 export class AuthRoutes {
@@ -14,8 +13,8 @@ export class AuthRoutes {
   }
 
   private initializeRoutes(): void {
-    this.router.post('/register', validate(registerSchema), wrapRequestHandler(this.authController.register))
+    this.router.post('/register', registerValidation, wrapRequestHandler(this.authController.register))
 
-    this.router.post('/login', validate(loginSchema), wrapRequestHandler(this.authController.login))
+    this.router.post('/login', loginValidation, wrapRequestHandler(this.authController.login))
   }
 }

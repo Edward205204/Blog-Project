@@ -1,11 +1,12 @@
 import { injectable, inject } from 'tsyringe'
-import { Prisma, PrismaClient, User } from '~/generated/prisma/client.js'
+import { Prisma, User } from '~/generated/prisma/client.js'
 
 import { ErrorWithStatus } from '~/shared/utils/error-status.js'
+import { PrismaService } from '../prisma-core/prisma.service.js'
 
 @injectable()
 export class UserService {
-  constructor(@inject(PrismaClient) private prisma: PrismaClient) {}
+  constructor(@inject(PrismaService) private prisma: PrismaService) {}
 
   public async checkEmailDoesNotExistOrFail(email: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
