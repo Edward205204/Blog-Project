@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { injectable, inject } from 'tsyringe'
 import { AuthService } from './auth.service.js'
+import { HTTP_STATUS } from '~/constants/http-status.js'
 
 @injectable()
 export class AuthController {
@@ -8,7 +9,7 @@ export class AuthController {
 
   public register = async (req: Request, res: Response) => {
     const result = await this.authService.register(req.body)
-    res.status(201).json({
+    res.status(HTTP_STATUS.CREATED).json({
       success: true,
       message: 'Register successfully',
       data: result
@@ -17,7 +18,7 @@ export class AuthController {
 
   public login = async (req: Request, res: Response) => {
     const result = await this.authService.login(req.body)
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       message: 'Login successfully',
       data: result

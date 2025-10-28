@@ -1,13 +1,15 @@
 import { ErrorWithStatus } from '~/shared/utils/error-status.js'
 import { injectable, inject } from 'tsyringe'
 import bcrypt from 'bcrypt'
-import { UserService } from '../users-core/user-core.service.js'
+import { UserService } from '../user-core/user-core.service.js'
 import { JwtUtils } from '~/shared/utils/jwt.utils.js'
 
 import { TokenType, UserRole } from '~/generated/prisma/enums.js'
 import { env } from '~/config/env.js'
 import { SignOptions } from 'jsonwebtoken'
 import { LoginDto, RegisterDto, TokenPayload } from './auth.dto.js'
+import { HTTP_STATUS } from '~/constants/http-status.js'
+import { omit } from '~/shared/utils/omit.js'
 
 @injectable()
 export class AuthService {
@@ -32,13 +34,13 @@ export class AuthService {
   }
 
   private async signAccessTokenAndRefreshToken(
-    payload: TokenPayload
+    payload: Omit<TokenPayload, 'tokenType'>
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.signAccessToken(payload),
-      this.signRefreshToken(payload)
+      this.signAccessToken({ ...payload, tokenType: TokenType.access }),
+      this.signRefreshToken({ ...payload, tokenType: TokenType.refresh })
     ])
-    return { accessToken: accessToken, refreshToken: refreshToken }
+    return { accessToken, refreshToken }
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -46,8 +48,7 @@ export class AuthService {
   }
 
   private async comparePassword(password: string, passwordHash: string): Promise<boolean> {
-    const userPasswordHash = await this.hashPassword(password)
-    return bcrypt.compare(userPasswordHash, passwordHash)
+    return bcrypt.compare(password, passwordHash)
   }
 
   public async register(data: RegisterDto) {
@@ -65,7 +66,6 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.signAccessTokenAndRefreshToken({
       id: user.id,
       email: user.email,
-      tokenType: TokenType.access,
       role: user.role
     })
 
@@ -73,27 +73,24 @@ export class AuthService {
   }
 
   public async login(data: LoginDto) {
-    const user = await this.userService.findUserByEmailOrFail(data.email)
+    const user = await this.userService.findUserByEmail(data.email)
+
+    if (!user) {
+      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Email or password is incorrect')
+    }
 
     const isPasswordMatch = await this.comparePassword(data.password, user.password_hash)
     if (!isPasswordMatch) {
-      throw new ErrorWithStatus(401, 'Email or password is incorrect')
+      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Email or password is incorrect')
     }
 
-    const accessToken = await this.signAccessToken({
+    const { accessToken, refreshToken } = await this.signAccessTokenAndRefreshToken({
       id: user.id,
       email: user.email,
-      tokenType: TokenType.access,
-      role: user.role
-    })
-    const refreshToken = await this.signRefreshToken({
-      id: user.id,
-      email: user.email,
-      tokenType: TokenType.refresh,
       role: user.role
     })
 
-    const { password_hash: _, ...userWithoutPassword } = user
+    const userWithoutPassword = omit(user, ['password_hash'])
     return { user: userWithoutPassword, accessToken, refreshToken }
   }
 }

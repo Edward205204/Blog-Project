@@ -3,6 +3,7 @@ import { Prisma, User } from '~/generated/prisma/client.js'
 
 import { ErrorWithStatus } from '~/shared/utils/error-status.js'
 import { PrismaService } from '../prisma-core/prisma.service.js'
+import { HTTP_STATUS } from '~/constants/http-status.js'
 
 @injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
       }
     })
     if (user) {
-      throw new ErrorWithStatus(409, 'Email này đã được sử dụng')
+      throw new ErrorWithStatus(HTTP_STATUS.CONFLICT, 'Email is already in use')
     }
   }
 
@@ -30,15 +31,13 @@ export class UserService {
    * Tìm user bằng email.
    * Nếu KHÔNG có, ném lỗi 404 (Not Found).
    */
-  public async findUserByEmailOrFail(email: string): Promise<User> {
+  public async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: {
         email
       }
     })
-    if (!user) {
-      throw new ErrorWithStatus(404, 'Không tìm thấy người dùng với email này')
-    }
+
     return user
   }
 
@@ -53,7 +52,7 @@ export class UserService {
       }
     })
     if (!user) {
-      throw new ErrorWithStatus(404, 'Không tìm thấy người dùng')
+      throw new ErrorWithStatus(HTTP_STATUS.NOT_FOUND, 'User not found')
     }
     return user
   }

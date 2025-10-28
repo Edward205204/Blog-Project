@@ -1,7 +1,7 @@
-import { injectable } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { PrismaClient } from '~/generated/prisma/client.js'
 
-@injectable()
+@singleton()
 export class PrismaService extends PrismaClient {
   constructor() {
     super()
