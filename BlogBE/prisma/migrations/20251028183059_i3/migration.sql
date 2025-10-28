@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Token" ALTER COLUMN "token_string" SET DATA TYPE VARCHAR(1000);

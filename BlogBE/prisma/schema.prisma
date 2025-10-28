@@ -53,9 +53,9 @@ model Token {
   id String @id @default(uuid()) @db.Uuid
   user_id String @db.Uuid 
   token_type TokenType 
-  token_string String @unique @db.VarChar(255)
-  expires_at DateTime @db.Timestamp(6)
-  issued_at DateTime @default(now()) @db.Timestamp(6)
+  token_string String @unique @db.VarChar(1000)
+  expires_at Int
+  issued_at Int
   created_at DateTime @default(now()) @db.Timestamp(6)
 }
 

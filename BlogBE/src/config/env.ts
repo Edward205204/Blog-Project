@@ -13,5 +13,11 @@ export const env = {
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || '',
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || '24w',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-  APP_NAME: process.env.APP_NAME || 'blog-backend'
+  APP_NAME: process.env.APP_NAME || 'blog-backend',
+  SMTP_USER: process.env.SMTP_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  APP_NAME_MS: process.env.APP_NAME_MS || '',
+  CLIENT_URL: process.env.CLIENT_URL || '',
+  EMAIL_VERIFICATION_TOKEN_SECRET: process.env.EMAIL_VERIFICATION_TOKEN_SECRET || '',
+  EMAIL_VERIFICATION_TOKEN_EXPIRES_IN: process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || '1h'
 }

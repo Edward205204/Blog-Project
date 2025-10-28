@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Verify Email</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+      }
+      .button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Hello {{USER_NAME}},</h1>
+      <p>Thank you for registering. Please verify your email by clicking the button below:</p>
+      <a href="{{VERIFY_LINK}}" class="button">Verify Email</a>
+      <p>If the button doesn't work, copy and paste this link into your browser:</p>
+      <p>{{VERIFY_LINK}}</p>
+    </div>
+  </body>
+</html>
