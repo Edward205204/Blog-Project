@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import { uuidv4 } from 'zod'
-import { logger } from '~/modules/logger-core/logger.service.js'
+import { container } from 'tsyringe'
+import { LoggerService } from '~/modules/logger-core/logger.service.js'
 
 export function requestLogger(req: Request, res: Response, next: NextFunction) {
-  const requestId = uuidv4()
+  const logger = container.resolve(LoggerService)
+  const requestId = crypto.randomUUID()
   const reqLogger = logger.child({ requestId, path: req.path, method: req.method })
 
   reqLogger.info('Incoming request')

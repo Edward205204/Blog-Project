@@ -5,14 +5,18 @@ import { globalErrorHandler } from './shared/middleware/error-handler.js'
 import { ErrorWithStatus } from './shared/utils/error-status.js'
 import { AuthRoutes } from './modules/auth/auth.routes.js'
 import { HTTP_STATUS } from './constants/http-status.js'
-import { logger } from './modules/logger-core/logger.service.js'
+
 import { requestLogger } from './shared/middleware/logger.middleware.js'
+import { LoggerService } from './modules/logger-core/logger.service.js'
 
 @injectable()
 export class Application {
   private app: Express
 
-  constructor(@inject(AuthRoutes) private authRoutes: AuthRoutes) {
+  constructor(
+    @inject(LoggerService) private logger: LoggerService,
+    @inject(AuthRoutes) private authRoutes: AuthRoutes
+  ) {
     this.app = express()
     this.setupMiddlewares()
     this.setupRoutes()
@@ -40,7 +44,7 @@ export class Application {
   public start(): void {
     const PORT = process.env.PORT || 3000
     this.app.listen(PORT, () => {
-      logger.info(`🚀 Server is running on port ${PORT}`)
+      console.log(`🚀 Server is running on port ${PORT}`)
     })
   }
 }
