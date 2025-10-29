@@ -8,7 +8,8 @@ export class MailTemplateService {
   private templates: Record<string, Handlebars.TemplateDelegate> = {}
 
   constructor() {
-    const templatesDir = path.resolve('src/templates/mails')
+    const templatesDir = path.join(__dirname, '../../templates/mails')
+
     fs.readdirSync(templatesDir).forEach((file) => {
       if (file.endsWith('.html')) {
         const content = fs.readFileSync(path.join(templatesDir, file), 'utf-8')

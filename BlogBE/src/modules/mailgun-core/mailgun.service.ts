@@ -3,13 +3,18 @@ import { IMailgunService, MailType } from './mailgun.dto.js'
 import nodemailer, { Transporter } from 'nodemailer'
 import { MailTemplateService } from './mail-template.service.js'
 import { env } from '~/config/env.js'
+import { LoggerService } from '../logger-core/logger.service.js'
 
 @singleton()
 export class MailgunService implements IMailgunService {
   private transporter: Transporter
 
-  constructor(@inject(MailTemplateService) private templateService: MailTemplateService) {
+  constructor(
+    @inject(MailTemplateService) private templateService: MailTemplateService,
+    @inject(LoggerService) private logger: LoggerService
+  ) {
     this.transporter = nodemailer.createTransport({
+      service: 'gmail',
       auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS
