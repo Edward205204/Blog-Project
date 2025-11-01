@@ -2,12 +2,13 @@ import { Button } from './button'
 
 interface SubmitButtonProps {
   pending: boolean
+  text: string
 }
 
-export function SubmitButton({ pending }: SubmitButtonProps) {
+export function SubmitButton({ pending, text }: SubmitButtonProps) {
   return (
     <Button type='submit' disabled={pending}>
-      {pending ? 'Đang đăng nhập...' : 'Đăng nhập'}
+      {pending ? 'Loading...' : text}
     </Button>
   )
 }

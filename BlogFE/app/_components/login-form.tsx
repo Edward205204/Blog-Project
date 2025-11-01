@@ -1,11 +1,12 @@
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { SubmitButton } from '../../components/ui/submit-button'
-import { LoginFormValues } from '../(auth)/login/page'
+import { Field, FieldDescription, FieldGroup, FieldSeparator } from '@/components/ui/field'
+
+import { SubmitButton } from '@/components/ui/submit-button'
+import { LoginFormValues } from '@/app/(auth)/login/page'
 import PasswordInput from '@/components/ui/password-input'
 import URL from '@/constants/url'
+import { InputWithError } from '@/components/ui/input-with-err'
 
 type LoginFormProps = {
   className?: string
@@ -44,34 +45,22 @@ export function LoginForm({
             </FieldDescription>
           </Field>
         )}
+        <InputWithError
+          name='email'
+          placeholder='m@example.com'
+          value={values.email}
+          onChange={(v) => updateField('email', v)}
+          error={errors.email}
+        />
+        <InputWithError
+          as={PasswordInput}
+          name='password'
+          value={values.password}
+          onChange={(v) => updateField('password', v)}
+          error={errors.password}
+        />
         <Field>
-          <FieldLabel htmlFor='email'>Email</FieldLabel>
-          <Input
-            id='email'
-            name='email'
-            placeholder='m@example.com'
-            value={values.email}
-            onChange={(e) => updateField('email', e.target.value)}
-          />
-          {errors?.email && <FieldDescription className='text-destructive'>{errors.email}</FieldDescription>}
-        </Field>
-        <Field>
-          <div className='flex items-center'>
-            <FieldLabel htmlFor='password'>Mật khẩu</FieldLabel>
-            <a href='#' className='ml-auto text-sm underline-offset-4 hover:underline'>
-              Quên mật khẩu?
-            </a>
-          </div>
-          <PasswordInput
-            id='password'
-            name='password'
-            value={values.password}
-            onChange={(e) => updateField('password', e.target.value)}
-          />
-          {errors?.password && <FieldDescription className='text-destructive'>{errors.password}</FieldDescription>}
-        </Field>
-        <Field>
-          <SubmitButton pending={isSubmitting} />
+          <SubmitButton pending={isSubmitting} text='Đăng nhập' />
         </Field>
         <FieldSeparator>Hoặc tiếp tục với</FieldSeparator>
         <Field>

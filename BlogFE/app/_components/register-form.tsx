@@ -2,9 +2,9 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { SubmitButton } from '../../components/ui/submit-button'
+import { SubmitButton } from '@/components/ui/submit-button'
 import PasswordInput from '@/components/ui/password-input'
-import { RegisterFormValues } from '../(auth)/register/page'
+import { RegisterFormValues } from '@/app/(auth)/register/page'
 import URL from '@/constants/url'
 
 type RegisterFormProps = {
@@ -93,7 +93,7 @@ export function RegisterForm({
         </Field>
 
         <Field>
-          <SubmitButton pending={isSubmitting} />
+          <SubmitButton pending={isSubmitting} text='Đăng ký' />
         </Field>
         <FieldSeparator>Hoặc tiếp tục với</FieldSeparator>
         <Field>

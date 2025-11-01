@@ -21,7 +21,7 @@ export class MailTemplateService {
 
   render(templateName: string, data: Record<string, any>): string {
     const template = this.templates[templateName]
-    if (!template) throw new Error(`Template ${templateName} not found`)
+    if (!template) throw new Error(`Template ${templateName} không tìm thấy`)
     return template(data)
   }
 }

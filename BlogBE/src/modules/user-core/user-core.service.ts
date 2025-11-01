@@ -16,7 +16,7 @@ export class UserService {
       }
     })
     if (user) {
-      throw new ErrorWithStatus(HTTP_STATUS.CONFLICT, 'Email is already in use')
+      throw new ErrorWithStatus(HTTP_STATUS.CONFLICT, 'Email đã tồn tại')
     }
   }
 
@@ -52,7 +52,7 @@ export class UserService {
       }
     })
     if (!user) {
-      throw new ErrorWithStatus(HTTP_STATUS.NOT_FOUND, 'User not found')
+      throw new ErrorWithStatus(HTTP_STATUS.NOT_FOUND, 'Không tìm thấy thông tin người dùng')
     }
     return user
   }
@@ -64,7 +64,7 @@ export class UserService {
       }
     })
     if (!user) {
-      throw new ErrorWithStatus(HTTP_STATUS.NOT_FOUND, 'User not found')
+      throw new ErrorWithStatus(HTTP_STATUS.NOT_FOUND, 'Không tìm thấy thông tin người dùng')
     }
     return user
   }

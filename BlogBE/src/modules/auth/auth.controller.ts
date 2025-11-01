@@ -16,7 +16,7 @@ export class AuthController {
     const result = await this.authService.register(req.body)
     res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: 'Register successfully',
+      message: 'Đăng ký thành công',
       data: result
     })
   }
@@ -25,7 +25,7 @@ export class AuthController {
     const result = await this.authService.login(req.body)
     res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: 'Login successfully',
+      message: 'Đăng nhập thành công',
       data: result
     })
   }
@@ -35,7 +35,7 @@ export class AuthController {
     await this.authService.logout(refresh_token)
     res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: 'Logout successfully'
+      message: 'Đăng xuất thành công'
     })
   }
 

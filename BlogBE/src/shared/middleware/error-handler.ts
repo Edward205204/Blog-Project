@@ -13,7 +13,7 @@ export const globalErrorHandler = (err: Error, req: Request, res: Response, next
   if (err instanceof ZodError) {
     return res.status(400).json({
       success: false,
-      message: 'Validation error',
+      message: 'Lỗi xác thực',
       errors: err.flatten().fieldErrors
     })
   }
@@ -21,6 +21,6 @@ export const globalErrorHandler = (err: Error, req: Request, res: Response, next
   console.error('ERROR 💥', err)
   return res.status(500).json({
     success: false,
-    message: 'An error occurred'
+    message: 'Đã xảy ra lỗi'
   })
 }

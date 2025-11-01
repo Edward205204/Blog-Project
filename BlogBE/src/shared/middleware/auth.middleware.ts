@@ -25,7 +25,7 @@ export class AuthMiddleware {
 
     const decoded = this.jwtUtils.verify(token)
     if (!decoded || !decoded.id) {
-      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Token is invalid or expired')
+      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ hoặc hết hạn')
     }
 
     const user = await this.userService.findUserByEmailOrFail(decoded.email)
@@ -38,11 +38,11 @@ export class AuthMiddleware {
   public validateRefreshToken = wrapRequestHandler(async (req: Request, res: Response, next: NextFunction) => {
     const refresh_token = req.body.refresh_token
     if (!refresh_token) {
-      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Refresh token is invalid or expired')
+      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Refresh token không hợp lệ hoặc hết hạn')
     }
     const decoded = this.jwtUtils.verify(refresh_token, env.REFRESH_TOKEN_SECRET)
     if (!decoded || !decoded.id) {
-      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Refresh token is invalid or expired')
+      throw new ErrorWithStatus(HTTP_STATUS.UNAUTHORIZED, 'Refresh token không hợp lệ hoặc hết hạn')
     }
     req.refresh_token_decoded = decoded as TokenPayload
     next()
